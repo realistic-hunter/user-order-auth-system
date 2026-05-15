@@ -55,16 +55,16 @@
 
 src/main/java/com/liushipin/userorderauthsystem
 
-├── controller    # 接口层
-├── service       # 业务层
-├── mapper        # 数据访问层
-├── entity        # 实体类
-├── dto           # 数据传输对象
-├── vo            # 返回对象
-├── config        # 配置类
-├── interceptor   # JWT 拦截器
-├── exception     # 全局异常处理
-└── util          # 工具类
+├── controller    # 接口层   
+├── service       # 业务层   
+├── mapper        # 数据访问层   
+├── entity        # 实体类   
+├── dto           # 数据传输对象   
+├── vo            # 返回对象   
+├── config        # 配置类   
+├── interceptor   # JWT 拦截器   
+├── exception     # 全局异常处理   
+└── util          # 工具类   
 
 5. 数据库设计
 
