@@ -14,16 +14,21 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-
     /**
      * 添加拦截器
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new AuthInterceptor())
-                // 拦截所有接口
                 .addPathPatterns("/**")
-                // 放行登录接口
-                .excludePathPatterns("/auth/login");
+                .excludePathPatterns(
+                        "/auth/login",
+                        // Swagger / OpenAPI 放行路径
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/v3/api-docs",
+                        "/v3/api-docs/**",
+                        "/webjars/**"
+                );
     }
 }

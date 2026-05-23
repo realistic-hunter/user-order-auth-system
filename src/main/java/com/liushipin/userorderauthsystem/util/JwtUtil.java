@@ -25,7 +25,6 @@ public class JwtUtil {
 
     /**
      * 签名密钥
-     *
      * 注意：
      * 真实项目不要写死在代码里，应该放到配置文件或环境变量。
      */
@@ -35,7 +34,6 @@ public class JwtUtil {
      * token 有效期：24 小时
      */
     private static final long EXPIRE_TIME = 24 * 60 * 60 * 1000L;
-
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     /**

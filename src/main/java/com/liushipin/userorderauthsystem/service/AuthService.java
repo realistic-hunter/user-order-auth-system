@@ -7,7 +7,6 @@ import com.liushipin.userorderauthsystem.vo.LoginVO;
  * 登录认证服务
  */
 public interface AuthService {
-
     /**
      * 用户登录
      */
