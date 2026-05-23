@@ -24,37 +24,26 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    /**
-     * 分页查询订单列表
-     */
     @Operation(summary = "分页查询订单列表", description = "管理员分页查看系统中的订单列表")
     @GetMapping("/orders")
     public Result<List<Order>> listAllOrders() {
         return Result.success(orderService.listAllOrders());
     }
 
-    /**
-     * 创建订单
-     * 当前用户 ID 从 token 中获取，不再由前端传 userId
-     */
+    @Operation(summary = "创建订单", description = "用户创建订单，订单信息由前端传入，当前登录用户 ID 从 token 中获取")
     @PostMapping("/orders")
     public Result<String> createOrder(@Valid @RequestBody OrderCreateDTO dto) {
         orderService.createOrder(dto);
         return Result.success("订单创建成功");
     }
 
-    /**
-     * 查询当前登录用户自己的订单
-     */
+    @Operation(summary = "查询我的订单", description = "用户查询自己创建的订单列表")
     @GetMapping("/orders/my")
     public Result<List<Order>> getMyOrders() {
         return Result.success(orderService.getMyOrders());
     }
 
-    /**
-     * 修改订单状态
-     * 管理员权限：order:update
-     */
+    @Operation(summary = "修改订单状态", description = "管理员修改订单状态，订单 ID 从路径参数获取，新的订单状态由前端传入")
     @PutMapping("/orders/{id}/status")
     public Result<String> updateOrderStatus(@PathVariable Long id,
                                             @Valid @RequestBody OrderStatusUpdateDTO dto) {
@@ -62,11 +51,7 @@ public class OrderController {
         return Result.success("订单状态修改成功");
     }
 
-
-    /**
-     * 删除订单
-     * 管理员权限：order:delete
-     */
+    @Operation(summary = "删除订单", description = "管理员删除订单，订单 ID 从路径参数获取")
     @DeleteMapping("/orders/{id}")
     public Result<String> deleteOrder(@PathVariable Long id) {
         orderService.deleteOrder(id);
