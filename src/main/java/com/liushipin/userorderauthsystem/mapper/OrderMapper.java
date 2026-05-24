@@ -1,6 +1,7 @@
 package com.liushipin.userorderauthsystem.mapper;
 
 import com.liushipin.userorderauthsystem.entity.Order;
+import com.liushipin.userorderauthsystem.vo.OrderVO;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -68,6 +69,55 @@ public interface OrderMapper {
             order by id desc
             """)
     List<Order> findAll();
+
+    /*
+     * 分页查询订单列表。
+     *
+     * status 为 null 时查询全部订单；
+     * status 不为 null 时追加 where status = #{status} 条件。
+     * limit + offset 是手写分页的核心语法。
+     */
+    @Select("""
+            <script>
+            select id,
+                   order_no as orderNo,
+                   user_id as userId,
+                   amount,
+                   status,
+                   remark,
+                   create_time as createTime,
+                   update_time as updateTime
+            from orders
+            <where>
+                <if test="status != null">
+                    status = #{status}
+                </if>
+            </where>
+            order by id desc
+            limit #{pageSize} offset #{offset}
+            </script>
+            """)
+    List<OrderVO> findPageByStatus(@Param("status") Integer status,
+                                   @Param("offset") Integer offset,
+                                   @Param("pageSize") Integer pageSize);
+
+    /*
+     * 查询符合筛选条件的订单总数。
+     *
+     * total 用于计算总页数 pages，也会返回给前端展示分页信息。
+     */
+    @Select("""
+            <script>
+            select count(*)
+            from orders
+            <where>
+                <if test="status != null">
+                    status = #{status}
+                </if>
+            </where>
+            </script>
+            """)
+    Long countByStatus(@Param("status") Integer status);
 
     //根据订单 ID 删除订单
     @Delete("""

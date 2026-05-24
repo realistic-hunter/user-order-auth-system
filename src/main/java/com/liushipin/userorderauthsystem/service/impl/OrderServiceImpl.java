@@ -7,6 +7,8 @@ import com.liushipin.userorderauthsystem.entity.Order;
 import com.liushipin.userorderauthsystem.exception.BusinessException;
 import com.liushipin.userorderauthsystem.mapper.OrderMapper;
 import com.liushipin.userorderauthsystem.service.OrderService;
+import com.liushipin.userorderauthsystem.vo.OrderVO;
+import com.liushipin.userorderauthsystem.vo.PageVO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -99,6 +101,39 @@ public class OrderServiceImpl implements OrderService {
     @RequirePermission(value = "order:list", message = "没有权限查看全部订单")
     public List<Order> listAllOrders() {
         return orderMapper.findAll();
+    }
+
+    /**
+     * 分页查询订单列表。
+     *
+     * Service 层负责分页相关计算：
+     * 1. 处理 pageNum、pageSize 的默认兜底
+     * 2. 根据页码和每页数量计算 offset
+     * 3. 根据 total 和 pageSize 计算总页数 pages
+     * 4. 组装统一的 PageVO 返回给 Controller
+     */
+    @Override
+    @RequirePermission(value = "order:list", message = "没有权限查看订单列表")
+    public PageVO<OrderVO> pageOrders(Integer pageNum, Integer pageSize, Integer status) {
+        int currentPageNum = pageNum == null || pageNum < 1 ? 1 : pageNum;
+        int currentPageSize = pageSize == null || pageSize < 1 ? 10 : pageSize;
+
+        // MySQL limit 的 offset 表示从第几条数据开始查，第一页从 0 开始。
+        int offset = (currentPageNum - 1) * currentPageSize;
+
+        Long total = orderMapper.countByStatus(status);
+        List<OrderVO> records = orderMapper.findPageByStatus(status, offset, currentPageSize);
+
+        // 向上取整计算总页数，例如 total=21、pageSize=10 时 pages=3。
+        int pages = total == 0 ? 0 : (int) ((total + currentPageSize - 1) / currentPageSize);
+
+        PageVO<OrderVO> pageVO = new PageVO<>();
+        pageVO.setTotal(total);
+        pageVO.setPageNum(currentPageNum);
+        pageVO.setPageSize(currentPageSize);
+        pageVO.setPages(pages);
+        pageVO.setRecords(records);
+        return pageVO;
     }
 
     /**

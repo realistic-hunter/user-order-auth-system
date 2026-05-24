@@ -5,6 +5,8 @@ import com.liushipin.userorderauthsystem.dto.OrderCreateDTO;
 import com.liushipin.userorderauthsystem.dto.OrderStatusUpdateDTO;
 import com.liushipin.userorderauthsystem.entity.Order;
 import com.liushipin.userorderauthsystem.service.OrderService;
+import com.liushipin.userorderauthsystem.vo.OrderVO;
+import com.liushipin.userorderauthsystem.vo.PageVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,6 +30,20 @@ public class OrderController {
     @GetMapping("/orders")
     public Result<List<Order>> listAllOrders() {
         return Result.success(orderService.listAllOrders());
+    }
+
+    /**
+     * 分页查询订单列表。
+     *
+     * Controller 只负责接收请求参数并调用 Service，
+     * 分页计算和业务规则放在 Service 层处理。
+     */
+    @Operation(summary = "分页查询订单列表", description = "管理员分页查询订单列表，可按订单状态筛选")
+    @GetMapping("/orders/page")
+    public Result<PageVO<OrderVO>> pageOrders(@RequestParam(defaultValue = "1") Integer pageNum,
+                                              @RequestParam(defaultValue = "10") Integer pageSize,
+                                              @RequestParam(required = false) Integer status) {
+        return Result.success(orderService.pageOrders(pageNum, pageSize, status));
     }
 
     @Operation(summary = "创建订单", description = "用户创建订单，订单信息由前端传入，当前登录用户 ID 从 token 中获取")

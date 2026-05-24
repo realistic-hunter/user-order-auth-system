@@ -108,3 +108,86 @@ Content-Type: application/json
 ### 管理员
 GET http://localhost:8080/orders
 Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHBpcmVUaW1lIjoxNzc4MzA1ODMzMjgzLCJ1c2VySWQiOjEsInVzZXJuYW1lIjoibGlzaSJ9.IiYohl5Mzaf3ebmS7_vmOofQm8UldeC95PPvCF7qp9M
+
+### 订单分页查询 - 第 1 页，每页 10 条（管理员）
+# 说明：该接口沿用订单列表权限校验，管理员 token 需要具备 order:list 权限。
+# 预期返回 JSON 示例：
+# {
+#   "code": 200,
+#   "message": "操作成功",
+#   "data": {
+#     "total": 21,
+#     "pageNum": 1,
+#     "pageSize": 10,
+#     "pages": 3,
+#     "records": [
+#       {
+#         "id": 21,
+#         "orderNo": "ORD1717214400000",
+#         "userId": 1,
+#         "amount": 99.90,
+#         "status": 0,
+#         "remark": "测试订单",
+#         "createTime": "2024-06-01T12:00:00",
+#         "updateTime": "2024-06-01T12:00:00"
+#       }
+#     ]
+#   }
+# }
+GET http://localhost:8080/orders/page?pageNum=1&pageSize=10
+Authorization: Bearer 管理员token
+
+### 订单分页查询 - 第 2 页，每页 5 条（管理员）
+# 预期返回 JSON 示例：
+# {
+#   "code": 200,
+#   "message": "操作成功",
+#   "data": {
+#     "total": 21,
+#     "pageNum": 2,
+#     "pageSize": 5,
+#     "pages": 5,
+#     "records": [
+#       {
+#         "id": 16,
+#         "orderNo": "ORD1717214300000",
+#         "userId": 1,
+#         "amount": 59.90,
+#         "status": 1,
+#         "remark": "测试订单",
+#         "createTime": "2024-06-01T11:50:00",
+#         "updateTime": "2024-06-01T11:55:00"
+#       }
+#     ]
+#   }
+# }
+GET http://localhost:8080/orders/page?pageNum=2&pageSize=5
+Authorization: Bearer 管理员token
+
+### 订单分页查询 - 按 status 筛选（管理员）
+# status 示例：0=待支付，1=已支付，2=已发货，3=已完成，4=已取消
+# 预期返回 JSON 示例：
+# {
+#   "code": 200,
+#   "message": "操作成功",
+#   "data": {
+#     "total": 8,
+#     "pageNum": 1,
+#     "pageSize": 10,
+#     "pages": 1,
+#     "records": [
+#       {
+#         "id": 16,
+#         "orderNo": "ORD1717214300000",
+#         "userId": 1,
+#         "amount": 59.90,
+#         "status": 1,
+#         "remark": "已支付订单",
+#         "createTime": "2024-06-01T11:50:00",
+#         "updateTime": "2024-06-01T11:55:00"
+#       }
+#     ]
+#   }
+# }
+GET http://localhost:8080/orders/page?pageNum=1&pageSize=10&status=1
+Authorization: Bearer 管理员token

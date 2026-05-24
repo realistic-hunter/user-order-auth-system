@@ -2,6 +2,8 @@ package com.liushipin.userorderauthsystem.service;
 
 import com.liushipin.userorderauthsystem.dto.OrderCreateDTO;
 import com.liushipin.userorderauthsystem.entity.Order;
+import com.liushipin.userorderauthsystem.vo.OrderVO;
+import com.liushipin.userorderauthsystem.vo.PageVO;
 
 import java.util.List;
 
@@ -29,6 +31,11 @@ public interface OrderService {
      * 查询全部订单
      */
     List<Order> listAllOrders();
+
+    /**
+     * 分页查询订单列表，可按订单状态筛选。
+     */
+    PageVO<OrderVO> pageOrders(Integer pageNum, Integer pageSize, Integer status);
 
     /**
      * 删除订单
