@@ -98,7 +98,7 @@ public interface OrderMapper {
             </script>
             """)
     List<OrderVO> findPageByStatus(@Param("status") Integer status,
-                                   @Param("offset") Integer offset,
+                                   @Param("offset") Long offset,
                                    @Param("pageSize") Integer pageSize);
 
     /*

@@ -23,6 +23,12 @@ import java.util.List;
 @Service
 public class OrderServiceImpl implements OrderService {
 
+    private static final int DEFAULT_PAGE_NUM = 1;
+    private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int MAX_PAGE_SIZE = 100;
+    private static final int MIN_ORDER_STATUS = 0;
+    private static final int MAX_ORDER_STATUS = 4;
+
     private final OrderMapper orderMapper;
 
     public OrderServiceImpl(OrderMapper orderMapper) {
@@ -115,11 +121,15 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @RequirePermission(value = "order:list", message = "没有权限查看订单列表")
     public PageVO<OrderVO> pageOrders(Integer pageNum, Integer pageSize, Integer status) {
-        int currentPageNum = pageNum == null || pageNum < 1 ? 1 : pageNum;
-        int currentPageSize = pageSize == null || pageSize < 1 ? 10 : pageSize;
+        if (status != null && (status < MIN_ORDER_STATUS || status > MAX_ORDER_STATUS)) {
+            throw new BusinessException(400, "订单状态只能是0到4");
+        }
+
+        int currentPageNum = pageNum == null || pageNum < 1 ? DEFAULT_PAGE_NUM : pageNum;
+        int currentPageSize = pageSize == null || pageSize < 1 ? DEFAULT_PAGE_SIZE : Math.min(pageSize, MAX_PAGE_SIZE);
 
         // MySQL limit 的 offset 表示从第几条数据开始查，第一页从 0 开始。
-        int offset = (currentPageNum - 1) * currentPageSize;
+        long offset = (long) (currentPageNum - 1) * currentPageSize;
 
         Long total = orderMapper.countByStatus(status);
         List<OrderVO> records = orderMapper.findPageByStatus(status, offset, currentPageSize);

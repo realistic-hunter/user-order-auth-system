@@ -1,193 +1,88 @@
+@baseUrl = http://localhost:8080
+@adminUsername = lisi
+@adminPassword = 123456
+
+### 登录并保存管理员 token
+# 说明：后面的订单管理接口需要 order:list / order:update / order:delete 权限。
+# 如果 lisi 不是管理员，请把上面的账号改成拥有这些权限的用户。
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{adminUsername}}",
+  "password": "{{adminPassword}}"
+}
+
+> {% client.global.set("adminToken", response.body.data.token); %}
+
 ### 创建订单
-POST http://localhost:8080/orders
+POST {{baseUrl}}/orders
 Content-Type: application/json
-
-{
-  "userId": 1,
-  "amount": 99.90,
-  "remark": "测试订单"
-}
-
-### 查询某个用户的订单
-GET http://localhost:8080/users/1/orders
-
-#### 修改订单状态
-PUT http://localhost:8080/orders/1/status
-Content-Type: application/json
-
-{
-  "status": 1
-}
-
-### 修改订单状态
-#PUT /orders/6/status
-#Content-Type: application/json
-#
-#{
-# "status": 1
-#}
-
-### 修改订单状态
-PUT http://localhost:8080/orders/7/status?userId=1
-Content-Type: application/json
-
-{
-  "status": 1
-}
-
-### 验证没有权限的人
-PUT http://localhost:8080/orders/7/status?userId=2
-Content-Type: application/json
-
-{
-  "status": 1
-}
-### 管理员查看全部订单
-GET http://localhost:8080/orders?userId=1
-### 删除
-DELETE http://localhost:8080/orders/6?userId=1
-### 创建订单时不传userId
-POST http://localhost:8080/orders
-Content-Type: application/json
+Authorization: Bearer {{adminToken}}
 
 {
   "amount": 99.90,
-  "remark": "测试参数校验"
+  "remark": "HTTP Client 创建订单"
 }
-### 创建订单时金额为0
-POST http://localhost:8080/orders
+
+### 查询我的订单
+GET {{baseUrl}}/orders/my
+Authorization: Bearer {{adminToken}}
+
+### 管理员查询全部订单
+GET {{baseUrl}}/orders
+Authorization: Bearer {{adminToken}}
+
+### 分页查询订单 - 默认第一页，每页 10 条
+GET {{baseUrl}}/orders/page
+Authorization: Bearer {{adminToken}}
+
+### 分页查询订单 - 第 1 页，每页 10 条
+GET {{baseUrl}}/orders/page?pageNum=1&pageSize=10
+Authorization: Bearer {{adminToken}}
+
+### 分页查询订单 - 第 2 页，每页 5 条
+GET {{baseUrl}}/orders/page?pageNum=2&pageSize=5
+Authorization: Bearer {{adminToken}}
+
+### 分页查询订单 - 按状态筛选
+# status: 0=待支付，1=已支付，2=已发货，3=已完成，4=已取消
+GET {{baseUrl}}/orders/page?pageNum=1&pageSize=10&status=1
+Authorization: Bearer {{adminToken}}
+
+### 分页查询订单 - pageNum/pageSize 小于 1 时使用默认值
+GET {{baseUrl}}/orders/page?pageNum=0&pageSize=0
+Authorization: Bearer {{adminToken}}
+
+### 分页查询订单 - pageSize 超过 100 时自动按 100 处理
+GET {{baseUrl}}/orders/page?pageNum=1&pageSize=1000
+Authorization: Bearer {{adminToken}}
+
+### 分页查询订单 - 非法状态，预期返回 code=400
+GET {{baseUrl}}/orders/page?pageNum=1&pageSize=10&status=9
+Authorization: Bearer {{adminToken}}
+
+### 未登录访问分页接口，预期返回 code=401
+GET {{baseUrl}}/orders/page?pageNum=1&pageSize=10
+
+### 修改订单状态
+PUT {{baseUrl}}/orders/1/status
 Content-Type: application/json
+Authorization: Bearer {{adminToken}}
 
 {
-  "userId": 1,
-  "amount": 0,
-  "remark": "测试金额校验"
+  "status": 1
 }
-### 修改订单时传9
-PUT http://localhost:8080/orders/8/status?userId=1
+
+### 修改订单状态 - 非法状态，预期返回 code=400
+PUT {{baseUrl}}/orders/1/status
 Content-Type: application/json
+Authorization: Bearer {{adminToken}}
 
 {
   "status": 9
 }
-### 查询用户时确认没有password
-GET http://localhost:8080/users/1
 
-
-### 登录
-POST http://localhost:8080/auth/login
-Content-Type: application/json
-
-{
-  "username": "lisi",
-  "password": "123456"
-}
-### 带token创建订单
-POST http://localhost:8080/orders
-Content-Type: application/json
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHBpcmVUaW1lIjoxNzc3ODk3NzE1ODExLCJ1c2VySWQiOjEsInVzZXJuYW1lIjoibGlzaSJ9.TeebC7UpHAvWCVVnVkqwkzDitMYZ4lowpQ17ashkDYg
-
-{
-  "amount": 99.90,
-  "remark": "登录后创建订单"
-}
-### 查询自己的订单
-GET http://localhost:8080/orders/my
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHBpcmVUaW1lIjoxNzc3ODk3NzE1ODExLCJ1c2VySWQiOjEsInVzZXJuYW1lIjoibGlzaSJ9.TeebC7UpHAvWCVVnVkqwkzDitMYZ4lowpQ17ashkDYg
-### 管理员查询全部订单
-GET http://localhost:8080/orders
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHBpcmVUaW1lIjoxNzc3ODk3NzE1ODExLCJ1c2VySWQiOjEsInVzZXJuYW1lIjoibGlzaSJ9.TeebC7UpHAvWCVVnVkqwkzDitMYZ4lowpQ17ashkDYg
-### 请求，管理员
-POST http://localhost:8080/auth/login
-Content-Type: application/json
-
-{
-  "username": "lisi",
-  "password": "123456"
-}
-### 管理员
-GET http://localhost:8080/orders
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHBpcmVUaW1lIjoxNzc4MzA1ODMzMjgzLCJ1c2VySWQiOjEsInVzZXJuYW1lIjoibGlzaSJ9.IiYohl5Mzaf3ebmS7_vmOofQm8UldeC95PPvCF7qp9M
-
-### 订单分页查询 - 第 1 页，每页 10 条（管理员）
-# 说明：该接口沿用订单列表权限校验，管理员 token 需要具备 order:list 权限。
-# 预期返回 JSON 示例：
-# {
-#   "code": 200,
-#   "message": "操作成功",
-#   "data": {
-#     "total": 21,
-#     "pageNum": 1,
-#     "pageSize": 10,
-#     "pages": 3,
-#     "records": [
-#       {
-#         "id": 21,
-#         "orderNo": "ORD1717214400000",
-#         "userId": 1,
-#         "amount": 99.90,
-#         "status": 0,
-#         "remark": "测试订单",
-#         "createTime": "2024-06-01T12:00:00",
-#         "updateTime": "2024-06-01T12:00:00"
-#       }
-#     ]
-#   }
-# }
-GET http://localhost:8080/orders/page?pageNum=1&pageSize=10
-Authorization: Bearer 管理员token
-
-### 订单分页查询 - 第 2 页，每页 5 条（管理员）
-# 预期返回 JSON 示例：
-# {
-#   "code": 200,
-#   "message": "操作成功",
-#   "data": {
-#     "total": 21,
-#     "pageNum": 2,
-#     "pageSize": 5,
-#     "pages": 5,
-#     "records": [
-#       {
-#         "id": 16,
-#         "orderNo": "ORD1717214300000",
-#         "userId": 1,
-#         "amount": 59.90,
-#         "status": 1,
-#         "remark": "测试订单",
-#         "createTime": "2024-06-01T11:50:00",
-#         "updateTime": "2024-06-01T11:55:00"
-#       }
-#     ]
-#   }
-# }
-GET http://localhost:8080/orders/page?pageNum=2&pageSize=5
-Authorization: Bearer 管理员token
-
-### 订单分页查询 - 按 status 筛选（管理员）
-# status 示例：0=待支付，1=已支付，2=已发货，3=已完成，4=已取消
-# 预期返回 JSON 示例：
-# {
-#   "code": 200,
-#   "message": "操作成功",
-#   "data": {
-#     "total": 8,
-#     "pageNum": 1,
-#     "pageSize": 10,
-#     "pages": 1,
-#     "records": [
-#       {
-#         "id": 16,
-#         "orderNo": "ORD1717214300000",
-#         "userId": 1,
-#         "amount": 59.90,
-#         "status": 1,
-#         "remark": "已支付订单",
-#         "createTime": "2024-06-01T11:50:00",
-#         "updateTime": "2024-06-01T11:55:00"
-#       }
-#     ]
-#   }
-# }
-GET http://localhost:8080/orders/page?pageNum=1&pageSize=10&status=1
-Authorization: Bearer 管理员token
+### 删除订单
+DELETE {{baseUrl}}/orders/1
+Authorization: Bearer {{adminToken}}

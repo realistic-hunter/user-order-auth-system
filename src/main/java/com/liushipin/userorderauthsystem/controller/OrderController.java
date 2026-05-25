@@ -26,7 +26,7 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    @Operation(summary = "分页查询订单列表", description = "管理员分页查看系统中的订单列表")
+    @Operation(summary = "查询全部订单列表", description = "管理员查看系统中的全部订单列表")
     @GetMapping("/orders")
     public Result<List<Order>> listAllOrders() {
         return Result.success(orderService.listAllOrders());
@@ -38,7 +38,7 @@ public class OrderController {
      * Controller 只负责接收请求参数并调用 Service，
      * 分页计算和业务规则放在 Service 层处理。
      */
-    @Operation(summary = "分页查询订单列表", description = "管理员分页查询订单列表，可按订单状态筛选")
+    @Operation(summary = "分页查询订单列表", description = "管理员分页查询订单列表，可按订单状态筛选；pageSize 最大为 100")
     @GetMapping("/orders/page")
     public Result<PageVO<OrderVO>> pageOrders(@RequestParam(defaultValue = "1") Integer pageNum,
                                               @RequestParam(defaultValue = "10") Integer pageSize,
