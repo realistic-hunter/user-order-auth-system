@@ -1,6 +1,6 @@
 # User Order Auth System
 
-Spring Boot learning project for user login, JWT authentication, permission checks, and order management.
+Spring Boot learning project for user login, JWT authentication, RBAC permission checks, and order management.
 
 ## Tech Stack
 
@@ -12,6 +12,17 @@ Spring Boot learning project for user login, JWT authentication, permission chec
 - Spring Validation
 - Spring AOP
 - Springdoc OpenAPI / Swagger UI
+
+## Project Highlights
+
+- Stateless login authentication based on JWT.
+- Password encryption and verification based on BCrypt.
+- Request authentication through a Spring MVC `HandlerInterceptor`.
+- Current user context isolation through `ThreadLocal`.
+- RBAC permission model: user -> role -> permission.
+- Declarative permission checks through custom annotation `@RequirePermission` and Spring AOP.
+- Unified API response and global exception handling.
+- Reproducible MySQL initialization scripts in `src/main/resources/sql`.
 
 ## Main Features
 
@@ -105,7 +116,30 @@ The file includes examples for:
 - First page with 10 records.
 - `pageNum=2&pageSize=5`.
 - Filtering by `status`.
-- Admin authorization placeholder: `Authorization: Bearer 管理员token`.
+- Admin authorization placeholder: `Authorization: Bearer <admin-token>`.
+
+## Database Setup
+
+The SQL initialization scripts are in:
+
+```text
+src/main/resources/sql
+```
+
+Run them in this order:
+
+```powershell
+mysql -uroot -p < src/main/resources/sql/schema.sql
+mysql -uroot -p < src/main/resources/sql/data.sql
+mysql -uroot -p < src/main/resources/sql/sample-data.sql
+```
+
+Default test accounts:
+
+| Username | Password | Role |
+| --- | --- | --- |
+| `lisi` | `123456` | Admin |
+| `zhangsan` | `123456` | Customer |
 
 ## API Documentation
 
@@ -119,7 +153,7 @@ The paginated order endpoint and VO fields are documented with OpenAPI annotatio
 
 ## Run
 
-Configure MySQL in `src/main/resources/application.yml`, then run:
+Configure MySQL in `src/main/resources/application.yml`, initialize the database, then run:
 
 ```bash
 ./mvnw spring-boot:run
@@ -129,6 +163,12 @@ On Windows:
 
 ```powershell
 .\mvnw.cmd spring-boot:run
+```
+
+Then open Swagger UI:
+
+```text
+http://localhost:8080/swagger-ui/index.html
 ```
 
 ## Recent Commit Scope
