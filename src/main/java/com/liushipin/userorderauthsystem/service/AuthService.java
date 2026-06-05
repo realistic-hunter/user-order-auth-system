@@ -11,4 +11,9 @@ public interface AuthService {
      * 用户登录
      */
     LoginVO login(LoginDTO dto);
+
+    /**
+     * 退出登录，使当前 JWT 在剩余有效期内失效。
+     */
+    void logout(String token);
 }

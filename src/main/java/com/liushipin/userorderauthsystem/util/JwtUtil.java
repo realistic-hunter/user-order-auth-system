@@ -82,6 +82,15 @@ public class JwtUtil {
         return Long.valueOf(userId.toString());
     }
 
+    public static long getExpireTime(String token) {
+        Map<String, Object> payload = parsePayload(token);
+        Object expireTime = payload.get("expireTime");
+        if (expireTime == null) {
+            throw new RuntimeException("token 中不存在 expireTime");
+        }
+        return Long.parseLong(expireTime.toString());
+    }
+
     /**
      * 校验 token 是否有效
      */

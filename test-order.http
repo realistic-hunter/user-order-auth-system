@@ -86,3 +86,11 @@ Authorization: Bearer {{adminToken}}
 ### 删除订单
 DELETE {{baseUrl}}/orders/1
 Authorization: Bearer {{adminToken}}
+
+### 退出登录，将 token 写入 Redis 黑名单
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{adminToken}}
+
+### 退出后再次访问，预期返回 code=401
+GET {{baseUrl}}/orders/my
+Authorization: Bearer {{adminToken}}

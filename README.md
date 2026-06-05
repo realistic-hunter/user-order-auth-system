@@ -11,6 +11,7 @@ Spring Boot learning project for user login, JWT authentication, RBAC permission
 - Lombok
 - Spring Validation
 - Spring AOP
+- Redis / Spring Data Redis
 - Springdoc OpenAPI / Swagger UI
 
 ## Project Highlights
@@ -21,6 +22,9 @@ Spring Boot learning project for user login, JWT authentication, RBAC permission
 - Current user context isolation through `ThreadLocal`.
 - RBAC permission model: user -> role -> permission.
 - Declarative permission checks through custom annotation `@RequirePermission` and Spring AOP.
+- Redis Cache Aside for user permission codes, with a 30-minute TTL and database fallback.
+- Redis login failure counters: 5 failed attempts trigger a 15-minute login restriction.
+- JWT logout blacklist stored by SHA-256 token digest, with TTL equal to the token's remaining lifetime.
 - Unified API response and global exception handling.
 - Reproducible MySQL initialization scripts in `src/main/resources/sql`.
 
@@ -44,6 +48,50 @@ Spring Boot learning project for user login, JWT authentication, RBAC permission
 | `GET` | `/orders/page` | Paginated admin order query, supports optional status filter | `order:list` |
 | `PUT` | `/orders/{id}/status` | Update order status | `order:update` |
 | `DELETE` | `/orders/{id}` | Delete order | `order:delete` |
+
+## Redis Design
+
+| Scenario | Redis key | TTL | Failure strategy |
+| --- | --- | --- | --- |
+| Permission cache | `auth:permission:user:{userId}` | 30 minutes | Fall back to MySQL |
+| Login failure counter | `auth:login:failure:{username}` | 15 minutes | Allow login flow to continue |
+| Logged-out JWT blacklist | `auth:token:blacklist:{sha256(token)}` | JWT remaining lifetime | Propagate the error to preserve the security boundary |
+
+Permission checks use the Cache Aside pattern:
+
+1. Read permission codes from Redis.
+2. On a cache miss, query MySQL.
+3. Write the result, including an empty permission list, back to Redis.
+4. Use TTL as the current consistency guarantee. When permission mutation APIs are added, they should evict the affected user's cache after the database transaction commits.
+
+Start a local Redis instance with Docker:
+
+```powershell
+docker run --name user-order-redis -p 6379:6379 -d redis:7-alpine
+```
+
+Create the local configuration from the tracked template:
+
+```powershell
+Copy-Item src/main/resources/application.example.yml src/main/resources/application.yml
+```
+
+Redis connection settings can be overridden with:
+
+```text
+REDIS_HOST
+REDIS_PORT
+REDIS_PASSWORD
+```
+
+Logout endpoint:
+
+```http
+POST /auth/logout
+Authorization: Bearer <token>
+```
+
+After logout, the same JWT is rejected even if its signature and expiration time are still valid.
 
 ## Paginated Order Query
 

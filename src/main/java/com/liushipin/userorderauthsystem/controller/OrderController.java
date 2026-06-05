@@ -34,7 +34,6 @@ public class OrderController {
 
     /**
      * 分页查询订单列表。
-     *
      * Controller 只负责接收请求参数并调用 Service，
      * 分页计算和业务规则放在 Service 层处理。
      */

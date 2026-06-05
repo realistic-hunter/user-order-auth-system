@@ -2,9 +2,11 @@ package com.liushipin.userorderauthsystem.interceptor;
 
 import com.liushipin.userorderauthsystem.common.UserContext;
 import com.liushipin.userorderauthsystem.exception.BusinessException;
+import com.liushipin.userorderauthsystem.service.TokenBlacklistService;
 import com.liushipin.userorderauthsystem.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
@@ -16,7 +18,14 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * 3. 校验 token
  * 4. 解析 userId，放入 UserContext
  */
+@Component
 public class AuthInterceptor implements HandlerInterceptor {
+
+    private final TokenBlacklistService tokenBlacklistService;
+
+    public AuthInterceptor(TokenBlacklistService tokenBlacklistService) {
+        this.tokenBlacklistService = tokenBlacklistService;
+    }
 
     /**
      * Controller 执行前触发
@@ -36,20 +45,24 @@ public class AuthInterceptor implements HandlerInterceptor {
         // 去掉 Bearer 前缀，得到真正的 token
         String token = authorization.substring(7);
 
+        Long userId;
         try {
             // 校验 token 是否有效
             JwtUtil.validateToken(token);
 
             // 从 token 中解析 userId
-            Long userId = JwtUtil.getUserId(token);
-
-            // 保存当前登录用户 ID
-            UserContext.setUserId(userId);
-
-            return true;
-        } catch (Exception e) {
+            userId = JwtUtil.getUserId(token);
+        } catch (RuntimeException e) {
             throw new BusinessException(401, "登录状态无效，请重新登录");
         }
+
+        if (tokenBlacklistService.isBlacklisted(token)) {
+            throw new BusinessException(401, "登录状态已退出，请重新登录");
+        }
+
+        // 保存当前登录用户 ID
+        UserContext.setUserId(userId);
+        return true;
     }
 
     /**

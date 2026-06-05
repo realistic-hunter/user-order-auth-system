@@ -30,4 +30,11 @@ public class AuthController {
     public Result<LoginVO> login(@Valid @RequestBody LoginDTO dto) {
         return Result.success(authService.login(dto));
     }
+
+    @Operation(summary = "退出登录", description = "将当前 JWT 加入 Redis 黑名单，直到令牌自然过期")
+    @PostMapping("/logout")
+    public Result<String> logout(@RequestHeader("Authorization") String authorization) {
+        authService.logout(authorization.substring(7));
+        return Result.success("退出登录成功");
+    }
 }
