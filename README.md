@@ -93,6 +93,74 @@ Authorization: Bearer <token>
 
 After logout, the same JWT is rejected even if its signature and expiration time are still valid.
 
+## Docker Deployment
+
+The repository contains a complete three-service deployment:
+
+- `app`: Spring Boot application built with a multi-stage Dockerfile.
+- `mysql`: MySQL 8.4 with persistent storage and automatic schema/sample-data initialization.
+- `redis`: Redis 7.4 with AOF persistence and password authentication.
+
+Prerequisite: Docker Desktop with Docker Compose v2.
+
+Create the local environment file:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Edit `.env` and replace all placeholder passwords and `JWT_SECRET`. Then build and start:
+
+```powershell
+docker compose up --build -d
+```
+
+Check container and application health:
+
+```powershell
+docker compose ps
+curl http://localhost:8080/actuator/health
+```
+
+Expected health response:
+
+```json
+{"status":"UP"}
+```
+
+Open Swagger UI:
+
+```text
+http://localhost:8080/swagger-ui/index.html
+```
+
+Default accounts initialized by the MySQL container:
+
+| Username | Password | Role |
+| --- | --- | --- |
+| `lisi` | `123456` | Admin |
+| `zhangsan` | `123456` | Customer |
+
+View application logs:
+
+```powershell
+docker compose logs -f app
+```
+
+Stop containers while preserving MySQL and Redis data:
+
+```powershell
+docker compose down
+```
+
+Delete containers and persisted data, then initialize the database again on the next startup:
+
+```powershell
+docker compose down -v
+```
+
+The SQL scripts under `src/main/resources/sql` only run when the MySQL data volume is first created.
+
 ## Paginated Order Query
 
 Endpoint:

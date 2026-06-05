@@ -28,7 +28,7 @@ public class JwtUtil {
      * 注意：
      * 真实项目不要写死在代码里，应该放到配置文件或环境变量。
      */
-    private static final String SECRET = "user-order-auth-secret-key";
+    private static final String DEFAULT_SECRET = "user-order-auth-secret-key";
 
     /**
      * token 有效期：24 小时
@@ -60,7 +60,7 @@ public class JwtUtil {
             String content = headerBase64 + "." + payloadBase64;
 
             // 签名
-            String signature = hmacSha256(content, SECRET);
+            String signature = hmacSha256(content, getSecret());
 
             return content + "." + signature;
         } catch (Exception e) {
@@ -103,7 +103,7 @@ public class JwtUtil {
             }
 
             String content = parts[0] + "." + parts[1];
-            String signature = hmacSha256(content, SECRET);
+            String signature = hmacSha256(content, getSecret());
 
             // 校验签名是否一致
             if (!signature.equals(parts[2])) {
@@ -158,5 +158,10 @@ public class JwtUtil {
         return Base64.getUrlEncoder()
                 .withoutPadding()
                 .encodeToString(signBytes);
+    }
+
+    private static String getSecret() {
+        String secret = System.getenv("JWT_SECRET");
+        return secret == null || secret.isBlank() ? DEFAULT_SECRET : secret;
     }
 }
