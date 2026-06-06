@@ -1,17 +1,11 @@
 name: CI
 
-# ============================================================
-# 触发条件：推送到任意分支或发起 PR 时自动运行
-# ============================================================
 on:
   push:
     branches: ["*"]
   pull_request:
     branches: [main, master]
 
-# ============================================================
-# 权限声明：给 workflow 写内容的权限（比如写 PR 评论）
-# ============================================================
 permissions:
   contents: read
   checks: write
@@ -21,10 +15,6 @@ jobs:
     name: Build & Test
     runs-on: ubuntu-latest
 
-    # ============================================================
-    # 服务容器：CI 运行时自动启动一个真实 MySQL 和 Redis
-    # 这样你的测试不需要 mock 数据库，可以直接连真实服务
-    # ============================================================
     services:
       mysql:
         image: mysql:8.4
@@ -50,20 +40,15 @@ jobs:
           --health-retries 10
 
     steps:
-      # 步骤 1：拉取代码
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 步骤 2：安装 JDK 25（Temurin 发行版，也就是以前的 AdoptOpenJDK）
       - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
           java-version: "25"
           distribution: temurin
 
-      # 步骤 3：缓存 Maven 依赖
-      # 原理：把 ~/.m2/repository 目录存下来，下次构建不用重新下载
-      # 缓存 key 基于 pom.xml 的哈希，pom 变了就重建缓存
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:
@@ -72,22 +57,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      # 步骤 4：运行测试
-      # mvnw 是项目自带的 Maven Wrapper，不需要全局安装 Maven
+      - name: Make Maven wrapper executable
+        run: chmod +x ./mvnw
+
       - name: Test
         run: ./mvnw test --batch-mode
         env:
-          # 用服务容器的连接信息覆盖 Spring 配置
           MYSQL_PASSWORD: testpass
           REDIS_HOST: localhost
           REDIS_PORT: 6379
           REDIS_PASSWORD: ""
 
-      # 步骤 5：打包（跳过测试，因为上一步已经跑过了）
       - name: Package
         run: ./mvnw package -DskipTests --batch-mode
 
-      # 步骤 6：验证测试报告（失败时在 Actions 页面汇总里直接看到哪些测试挂了）
       - name: Publish test report
         uses: dorny/test-reporter@v1
         if: success() || failure()
@@ -95,3 +78,4 @@ jobs:
           name: Maven Tests
           path: target/surefire-reports/*.xml
           reporter: java-junit
+          if-no-files-found: warn
