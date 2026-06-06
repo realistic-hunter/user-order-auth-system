@@ -63,6 +63,10 @@ jobs:
       - name: Test
         run: ./mvnw test --batch-mode
         env:
+          MYSQL_HOST: localhost
+          MYSQL_PORT: 3306
+          MYSQL_DATABASE: user_order_auth
+          MYSQL_USERNAME: root
           MYSQL_PASSWORD: testpass
           REDIS_HOST: localhost
           REDIS_PORT: 6379
@@ -70,6 +74,15 @@ jobs:
 
       - name: Package
         run: ./mvnw package -DskipTests --batch-mode
+        env:
+          MYSQL_HOST: localhost
+          MYSQL_PORT: 3306
+          MYSQL_DATABASE: user_order_auth
+          MYSQL_USERNAME: root
+          MYSQL_PASSWORD: testpass
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          REDIS_PASSWORD: ""
 
       - name: Publish test report
         uses: dorny/test-reporter@v1
