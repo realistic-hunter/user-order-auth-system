@@ -10,6 +10,12 @@ spring:
       password: ${REDIS_PASSWORD}
       timeout: 2s
 
+app:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:user-order-auth-system-default-jwt-secret-please-change}
+      expiration: 24h
+
 management:
   endpoints:
     web:

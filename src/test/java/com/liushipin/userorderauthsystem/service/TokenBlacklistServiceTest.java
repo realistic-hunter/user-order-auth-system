@@ -1,12 +1,13 @@
 package com.liushipin.userorderauthsystem.service;
 
-import com.liushipin.userorderauthsystem.util.JwtUtil;
+import com.liushipin.userorderauthsystem.security.JwtService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 import java.time.Duration;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -21,9 +22,11 @@ class TokenBlacklistServiceTest {
         StringRedisTemplate redisTemplate = mock(StringRedisTemplate.class);
         @SuppressWarnings("unchecked")
         ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+        JwtService jwtService = mock(JwtService.class);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        TokenBlacklistService service = new TokenBlacklistService(redisTemplate);
-        String token = JwtUtil.generateToken(1L, "lisi");
+        TokenBlacklistService service = new TokenBlacklistService(redisTemplate, jwtService);
+        String token = "jwt-token";
+        when(jwtService.getExpiresAt(token)).thenReturn(Instant.now().plus(Duration.ofHours(24)));
 
         service.blacklist(token);
 

@@ -1,6 +1,6 @@
 package com.liushipin.userorderauthsystem.service;
 
-import com.liushipin.userorderauthsystem.util.JwtUtil;
+import com.liushipin.userorderauthsystem.security.JwtService;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -16,13 +16,15 @@ public class TokenBlacklistService {
     private static final String KEY_PREFIX = "auth:token:blacklist:";
 
     private final StringRedisTemplate redisTemplate;
+    private final JwtService jwtService;
 
-    public TokenBlacklistService(StringRedisTemplate redisTemplate) {
+    public TokenBlacklistService(StringRedisTemplate redisTemplate, JwtService jwtService) {
         this.redisTemplate = redisTemplate;
+        this.jwtService = jwtService;
     }
 
     public void blacklist(String token) {
-        long remainingMillis = JwtUtil.getExpireTime(token) - System.currentTimeMillis();
+        long remainingMillis = jwtService.getExpiresAt(token).toEpochMilli() - System.currentTimeMillis();
         if (remainingMillis > 0) {
             redisTemplate.opsForValue().set(
                     key(token),

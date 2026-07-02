@@ -43,10 +43,10 @@ public class PermissionAspect {
         String errorMessage = requirePermission.message();
 
         // 从 UserContext 中获取当前登录用户 ID
-        // 这个 userId 是 AuthInterceptor 从 token 中解析出来后放进去的
+        // 这个 userId 是 JwtAuthenticationFilter 从 token 中解析出来后放进去的
         Long userId = UserContext.getUserId();
 
-        // 理论上只要经过 AuthInterceptor，这里就应该有 userId
+        // 理论上只要经过 Spring Security 认证过滤器，这里就应该有 userId
         // 如果没有，说明请求没有正常经过登录认证流程
         if (userId == null) {
             throw new BusinessException(401, "请先登录");

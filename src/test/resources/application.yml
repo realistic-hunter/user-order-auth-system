@@ -19,6 +19,10 @@ mybatis:
     map-underscore-to-camel-case: true
 
 app:
+  security:
+    jwt:
+      secret: user-order-auth-system-default-jwt-secret-please-change
+      expiration: 24h
   redis:
     permission-cache-ttl: 30m
     login-failure-window: 15m
